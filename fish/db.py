@@ -1,11 +1,13 @@
 from bsddb3 import db as bdb
+from threading import Thread, Lock
 import os, time, sys, shutil, argparse, string
 
 SECOND = 1000000
+statusMutex = Lock()
 
 class DB:
 
-  def __init__(self, dir, address, priority, buddy, wants_master):
+  def __init__(self, dir, address, priority, buddy, wants_master, readonly):
     self.env = self.openEnv(dir, priority)
     if os.getenv("DEBUG"):
       self.env.set_verbose(bdb.DB_VERB_REPLICATION, True)
@@ -34,8 +36,12 @@ class DB:
       helperSite.close()
 
       self.env.repmgr_start(1, bdb.DB_REP_CLIENT)
-      time.sleep(5)
-      self.db = bdb.DB(self.env).open('local', bdb.DB_HASH)
+      time.sleep(2)
+      if readonly:
+        self.db = bdb.DB(self.env).open('local', bdb.DB_HASH, bdb.DB_RDONLY)
+      else:
+        self.db = bdb.DB(self.env).open('local', bdb.DB_HASH)
+    self.startReport()
 
   def eventCallback(self, dbenv, msg, notsure):
     print("at=rep-event msg=%s" % msg)
@@ -55,6 +61,19 @@ class DB:
     env.rep_set_timeout(bdb.DB_REP_HEARTBEAT_SEND, int(SECOND/2))
     return(env)
 
+  def startReport(self):
+    def printReport(d):
+      while True:
+        time.sleep(2)
+        if d.is_master():
+          print('role=master master=%s' % d.master_address())
+        else:
+          print('role=client master=%s' % d.master_address())
+    t = Thread(target=printReport, args=(self,))
+    t.daemon = True #handle signals
+    t.start()
+
+
   def is_master(self):
     return(self.status()['status'] == 2)
 
@@ -67,4 +86,8 @@ class DB:
     return(self.env.repmgr_site_by_eid(meid))
 
   def status(self):
-    return(self.env.rep_stat())
+    statusMutex.acquire()
+    try:
+      return(self.env.rep_stat())
+    finally:
+      statusMutex.release()

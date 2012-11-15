@@ -1,4 +1,4 @@
-import argparse, os
+import argparse, os, requests, json
 from db import DB
 from flask import Flask, redirect, request
 
@@ -8,25 +8,20 @@ parser.add_argument('--buddy', default=None)
 parser.add_argument('--dir')
 parser.add_argument('--priority', type=int, default=0)
 parser.add_argument('--want-master', action="store_true", default=False)
-args = parser.parse_args()
+a = parser.parse_args()
 
-db = DB(args.dir, args.address, args.priority, args.buddy, args.want_master)
+db = DB(a.dir, a.address, a.priority, a.buddy, a.want_master, True)
 app = Flask(__name__)
-
-@app.route('/is-master')
-def is_master():
-  if db.is_master():
-    return('yes')
-  else:
-    return('no')
 
 @app.route('/receive', methods=['PUT'])
 def receive():
-  if db.is_master():
-    return('at=accept body=%s' % request.form['data'])
-  else:
     addr = db.master_address()
-    return('at=deny master=%s' % addr)
+    url = "http://{0}/data".format(addr)
+    headers = {'content-type': 'application/json'}
+    payload = {'hello': 'world'}
+    #resp = requests.put(url, data=json.dump(payload))
+    print('at=forward master=%s' % url)
+    return(url)
 
 if __name__ == '__main__':
   port = int(os.environ.get('PORT', 5000))
