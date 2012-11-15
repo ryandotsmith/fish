@@ -23,18 +23,26 @@ $ pip install -r requirements.txt
 $ source venv/bin/active
 ```
 
-Start a master:
+Start a back-end master:
 
 ```bash
-$ mkdir d0
+$ bin/setup b0
 $ export PORT=5000
-$ bin/front --dir d0 --address localhost:9000 --want-master --priority 10
+$ bin/back --dir b0 --address localhost:9000 --want-master --priority 10
 ```
 
-Start a reader:
+Start a back-end client:
 
 ```bash
-$ mkdir d1
+$ bin/setup b1
 $ export PORT=5001
-$ bin/front --dir d1 --address localhost:9001 --buddy localhost:9000
+$ bin/back --dir b1 --address localhost:9001 --buddy localhost:9000
+```
+
+Start a front-end:
+
+```bash
+$ bin/setup r0
+$ export PORT=8000
+$ bin/front --dir r0 --address localhost:9002 --buddy localhost:9000
 ```
