@@ -13,3 +13,18 @@ The idea is to have a fleet of front-end services that receive PUT/GET requests 
 ## Why Fish Matters
 
 Fish leverages BerkelyDB which is a stable, mature & feature-full database. BDB offers a single Writer topology with a paxos implemented leader election manager. Furthermore, BDB offers granular control over data consistency. Transaction can be committed to a quorum, all-eligible-leaders, or all sites.
+
+## Usage
+
+```bash
+$ git clone git://github.com/ryandotsmith/fish.git
+$ cd fish
+$ pip install -r requirements.txt
+```
+
+Start a master:
+
+```bash
+$ mkdir d0
+$ python fish/web.py
+```

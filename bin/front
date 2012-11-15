@@ -1,0 +1,2 @@
+#sh
+python fish/front.py $*
