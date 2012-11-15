@@ -20,11 +20,21 @@ Fish leverages BerkelyDB which is a stable, mature & feature-full database. BDB 
 $ git clone git://github.com/ryandotsmith/fish.git
 $ cd fish
 $ pip install -r requirements.txt
+$ source venv/bin/active
 ```
 
 Start a master:
 
 ```bash
 $ mkdir d0
-$ python fish/web.py
+$ export PORT=5000
+$ bin/front --dir d0 --address localhost:9000 --want-master --priority 10
+```
+
+Start a reader:
+
+```bash
+$ mkdir d1
+$ export PORT=5001
+$ bin/front --dir d1 --address localhost:9001 --buddy localhost:9000
 ```
