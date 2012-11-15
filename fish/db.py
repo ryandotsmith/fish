@@ -16,7 +16,7 @@ class DB:
       site = self.env.repmgr_site(lh, int(lp))
       site.set_config(bdb.DB_LOCAL_SITE, True)
       site.set_config(bdb.DB_GROUP_CREATOR, True)
-      #site.close()
+      site.close()
 
       self.env.repmgr_start(1, bdb.DB_REP_MASTER)
       self.db = bdb.DB(self.env).open('local', bdb.DB_HASH, bdb.DB_CREATE)
@@ -26,12 +26,12 @@ class DB:
       lh, _, lp = address.partition(':')
       localSite = self.env.repmgr_site(lh, int(lp))
       localSite.set_config(bdb.DB_LOCAL_SITE, True)
-      #localSite.close()
+      localSite.close()
 
       bh, _, bp = buddy.partition(':')
       helperSite = self.env.repmgr_site(bh, int(bp))
       helperSite.set_config(bdb.DB_BOOTSTRAP_HELPER, True)
-      #helperSite.close()
+      helperSite.close()
 
       self.env.repmgr_start(1, bdb.DB_REP_CLIENT)
       time.sleep(5)
